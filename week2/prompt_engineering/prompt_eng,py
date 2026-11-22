@@ -1,0 +1,46 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from groq import Groq
+
+load_dotenv()
+my_api_key = os.getenv("GROQ_API_KEY")
+
+if not my_api_key:
+    raise ValueError("GROQ_API_KEY environment variable not set. Please set it in your .env file.")
+
+client = Groq(api_key=my_api_key)
+model = "openai/gpt-oss-120b"
+
+def llm_ans(prompt):
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return response.choices[0].message.content
+
+prompt = """
+# Role:
+    You are a customer support agent for a food delivery app. Your task is to assist users with their complaints and provide solutions to their issues.
+
+# Task:
+    You have to classify the issue in a category.
+
+# Constraints:
+    You have to classify the issue in one of three categories namely Software, Hardware, or Network.
+
+#Output Format:
+    Your answer should be in one word only. The one word shoud be one of the categories given in constraints.
+
+# Example:
+    -If the user complaint is "My app keeps crashing when I try to place an order", your output should be "Software".
+
+# Fallback:
+    If the user complaint does not fit into any of the categories, your output should be "Other".
+
+   # This is User Complaint:
+    App downloading the new update very slowly.
+"""
+print(llm_ans(prompt))
